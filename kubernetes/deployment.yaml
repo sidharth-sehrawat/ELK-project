@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mario-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mario-app
+  template:
+    metadata:
+      labels:
+        app: mario-app
+    spec:
+      nodeSelector:
+        workload: stateless
+      containers:
+      - name: mario-app
+        image: asia-south1-docker.pkg.dev/devops-elk-project/mario-repo/mario-app:latest
+        ports:
+        - containerPort: 8080
