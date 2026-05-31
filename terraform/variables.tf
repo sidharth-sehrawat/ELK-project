@@ -9,8 +9,10 @@ variable "region" {
   default     = "asia-south1"
 }
 
-variable  "zone"  {
-  default = "asia-south1-a"
+variable "zone" {
+  description = "Zone"
+  type        = string
+  default     = "asia-south1-a"
 }
 
 variable "cluster_name" {

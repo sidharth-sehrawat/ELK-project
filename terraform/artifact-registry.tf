@@ -1,9 +1,9 @@
-resource  "google_artifact_registry_repository" "docker_repo" {
-  location  = var.region
+resource "google_artifact_registry_repository" "docker_repo" {
+  location = var.region
 
   repository_id = "mario-repo"
 
   description = "Mario app images"
 
-  format  = "DOCKER"
+  format = "DOCKER"
 }
