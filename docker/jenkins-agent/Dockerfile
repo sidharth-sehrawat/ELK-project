@@ -2,20 +2,20 @@ FROM jenkins/inbound-agent:latest
 
 USER root
 
-# Basic utilities
+# Install base packages
 RUN apt-get update && apt-get install -y \
     curl \
-    unzip \
-    jq \
-    git \
     wget \
-    apt-transport-https \
+    unzip \
     gnupg \
     lsb-release \
+    apt-transport-https \
+    ca-certificates \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
-# kubectl
-RUN curl -LO "https://dl.k8s.io/release/v1.36.1/bin/linux/amd64/kubectl" && \
+# Kubectl
+RUN curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl" && \
     install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl && \
     rm kubectl
 
@@ -30,15 +30,6 @@ RUN wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | \
     apt-get update && \
     apt-get install -y trivy
 
-# Gitleaks
-RUN wget -O /tmp/gitleaks.tar.gz \
-    https://github.com/gitleaks/gitleaks/releases/download/v8.24.2/gitleaks_8.24.2_linux_x64.tar.gz && \
-    tar -xzf /tmp/gitleaks.tar.gz -C /tmp && \
-    mv /tmp/gitleaks /usr/local/bin/gitleaks && \
-    chmod +x /usr/local/bin/gitleaks && \
-    rm -f /tmp/gitleaks.tar.gz
-
-
 # Docker CLI
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg | \
     gpg --dearmor -o /usr/share/keyrings/docker.gpg && \
@@ -49,5 +40,14 @@ RUN curl -fsSL https://download.docker.com/linux/debian/gpg | \
     apt-get update && \
     apt-get install -y docker-ce-cli
 
+# Sonar Scanner
+ENV SONAR_SCANNER_VERSION=7.2.0.5079
+
+RUN wget -O /tmp/sonar-scanner.zip \
+    https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-${SONAR_SCANNER_VERSION}-linux-x64.zip && \
+    unzip /tmp/sonar-scanner.zip -d /opt && \
+    mv /opt/sonar-scanner-* /opt/sonar-scanner && \
+    ln -s /opt/sonar-scanner/bin/sonar-scanner /usr/local/bin/sonar-scanner && \
+    rm -f /tmp/sonar-scanner.zip
 
 USER jenkins
