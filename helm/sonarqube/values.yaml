@@ -1,0 +1,26 @@
+nodeSelector:
+  workload: stateful
+
+resources:
+  requests:
+    cpu: "250m"
+    memory: "1Gi"
+
+  limits:
+    cpu: "1000m"
+    memory: "2Gi"
+
+persistence:
+  enabled: true
+  size: 10Gi
+
+service:
+  type: ClusterIP
+
+ingress:
+  enabled: false
+
+monitoringPasscode: "sonar123"
+
+community:
+  enabled: true

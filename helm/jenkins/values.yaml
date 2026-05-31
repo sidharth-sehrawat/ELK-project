@@ -1,0 +1,30 @@
+controller:
+
+  nodeSelector:
+    workload: stateful
+
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "512Mi"
+
+    limits:
+      cpu: "500m"
+      memory: "1Gi"
+
+  serviceType: ClusterIP
+
+  ingress:
+    enabled: false
+
+  admin:
+    username: admin
+    password: admin123
+
+persistence:
+  enabled: true
+  size: 10Gi
+
+agent:
+  nodeSelector:
+    workload: stateless
