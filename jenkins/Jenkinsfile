@@ -1,31 +1,78 @@
 pipeline {
-    agent any
 
-    stages {
 
-        stage('Checkout') {
-            steps {
-                checkout scm
+agent {
+    label 'jenkins-agent'
+}
+
+stages {
+
+    stage('Checkout') {
+        steps {
+            git branch: 'main',
+                credentialsId: 'github-ssh',
+                url: 'git@github.com:sidharth-sehrawat/ELK-project.git'
+        }
+    }
+
+    stage('SonarQube Analysis') {
+        steps {
+            withSonarQubeEnv('sonarqube') {
+                sh '''
+                sonar-scanner \
+                -Dsonar.projectKey=ELK-project \
+                -Dsonar.projectName=ELK-project \
+                -Dsonar.sources=. \
+                -Dsonar.token=$SONAR_AUTH_TOKEN
+                '''
             }
         }
+    }
 
-        stage('SonarQube Analysis') {
-            steps {
-                script {
-                    def scannerHome = tool 'sonar-scanner'
+    stage('Trivy Scan') {
+        steps {
+            sh '''
+            trivy fs . \
+            --severity HIGH,CRITICAL \
+            --no-progress
+            '''
+        }
+    }
 
-                    withSonarQubeEnv('sonarqube') {
-                        sh """
-                        ${scannerHome}/bin/sonar-scanner \
-                        -Dsonar.projectKey=mario \
-                        -Dsonar.projectName=mario \
-                        -Dsonar.sources=mario/src
-                        """
-                    }
-                }
-            }
+    stage('Deploy') {
+        steps {
+            sh '''
+            kubectl rollout restart deployment/mario-app -n default
+
+            kubectl rollout status deployment/mario-app \
+            -n default \
+            --timeout=300s
+            '''
+        }
+    }
+
+    stage('Verification') {
+        steps {
+            sh '''
+            kubectl get pods -n default
+            kubectl get svc -n default
+            kubectl get ingress -n default
+            '''
         }
     }
 }
 
+post {
+
+    success {
+        echo 'Pipeline completed successfully'
+    }
+
+    failure {
+        echo 'Pipeline failed'
+    }
+}
+
+
+}
 
