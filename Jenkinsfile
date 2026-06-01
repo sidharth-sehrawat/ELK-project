@@ -18,6 +18,16 @@ stages {
         }
     }
 
+stage('Gitleaks Scan') {
+    steps {
+        sh '''
+        gitleaks detect . \
+        --no-git \
+        --verbose
+        '''
+    }
+}
+
     stage('Trivy Filesystem Scan') {
         steps {
             sh '''
