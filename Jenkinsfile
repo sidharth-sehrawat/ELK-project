@@ -1,7 +1,11 @@
 pipeline {
-
 agent {
-    label 'jenkins-agent'
+label 'jenkins-agent'
+}
+
+environment {
+    IMAGE_NAME = "asia-south1-docker.pkg.dev/devops-elk-project/mario-repo/mario-app"
+    IMAGE_TAG  = "${BUILD_NUMBER}"
 }
 
 stages {
@@ -14,48 +18,45 @@ stages {
         }
     }
 
-    stage('SonarQube Analysis') {
+    stage('Trivy Filesystem Scan') {
         steps {
-            withSonarQubeEnv('sonarqube') {
+            sh '''
+            trivy fs . --severity HIGH,CRITICAL || true
+            '''
+        }
+    }
+stage('Debug Workspace') {
+    steps {
+        sh '''
+        pwd
+        ls -la
+        ls -la mario
+        '''
+    }
+}
+    stage('Build & Push Image') {
+        steps {
+            container('kaniko') {
                 sh '''
-                sonar-scanner \
-                -Dsonar.projectKey=ELK-project \
-                -Dsonar.projectName=ELK-project \
-                -Dsonar.sources=. \
-                -Dsonar.token=$SONAR_AUTH_TOKEN
+                /kaniko/executor \
+                  --context=${WORKSPACE}/mario \
+                  --dockerfile=${WORKSPACE}/mario/Dockerfile \
+                  --destination=${IMAGE_NAME}:latest \
+                  --destination=${IMAGE_NAME}:${IMAGE_TAG}
                 '''
             }
         }
     }
 
-    stage('Trivy Scan') {
+    stage('Deploy to GKE') {
         steps {
             sh '''
-            trivy fs . \
-            --severity HIGH,CRITICAL \
-            --no-progress
-            '''
-        }
-    }
-
-    stage('Deploy') {
-        steps {
-            sh '''
-            kubectl rollout restart deployment/mario-app -n default
+            kubectl set image deployment/mario-app \
+            mario-app=${IMAGE_NAME}:latest \
+            -n default
 
             kubectl rollout status deployment/mario-app \
-            -n default \
-            --timeout=300s
-            '''
-        }
-    }
-
-    stage('Verification') {
-        steps {
-            sh '''
-            kubectl get pods -n default
-            kubectl get svc -n default
-            kubectl get ingress -n default
+            -n default --timeout=300s
             '''
         }
     }
@@ -64,11 +65,11 @@ stages {
 post {
 
     success {
-        echo 'Pipeline completed successfully'
+        echo 'Pipeline completed successfully.'
     }
 
     failure {
-        echo 'Pipeline failed'
+        echo 'Pipeline failed.'
     }
 }
 
