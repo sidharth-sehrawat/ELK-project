@@ -16,6 +16,6 @@ spec:
         workload: stateless
       containers:
       - name: mario-app
-        image: asia-south1-docker.pkg.dev/devops-elk-project/mario-repo/mario-app:latest
+        image: asia-south1-docker.pkg.dev/devops-elk-project/mario-repo/mario-app:kaniko-test
         ports:
         - containerPort: 8080

@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Pod
+
+spec:
+  containers:
+    - name: kaniko
+      image: gcr.io/kaniko-project/executor:v1.23.2-debug
+      tty: true
+
+    - name: jnlp
+      image: asia-south1-docker.pkg.dev/devops-elk-project/mario-repo/jenkins-devops-agent:v6

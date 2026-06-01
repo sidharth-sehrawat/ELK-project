@@ -30,6 +30,15 @@ RUN wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | \
     apt-get update && \
     apt-get install -y trivy
 
+
+# Install Gitleaks
+RUN wget https://github.com/gitleaks/gitleaks/releases/download/v8.28.0/gitleaks_8.28.0_linux_x64.tar.gz && \
+    tar -xzf gitleaks_8.28.0_linux_x64.tar.gz && \
+    mv gitleaks /usr/local/bin/ && \
+    chmod +x /usr/local/bin/gitleaks && \
+    rm -f gitleaks_8.28.0_linux_x64.tar.gz LICENSE README.md
+
+
 # Docker CLI
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg | \
     gpg --dearmor -o /usr/share/keyrings/docker.gpg && \

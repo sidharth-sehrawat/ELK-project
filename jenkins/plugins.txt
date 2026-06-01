@@ -1,0 +1,12 @@
+kubernetes
+workflow-aggregator
+git
+github
+ssh-agent
+credentials
+plain-credentials
+matrix-auth
+sonar
+trivy
+configuration-as-code
+job-dsl

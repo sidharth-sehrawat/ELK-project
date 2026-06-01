@@ -2,3 +2,23 @@
 *.tfstate
 *.tfstate.*
 .terraform.lock.hcl
+
+
+kaniko-key.json
+# GCP credentials
+kaniko-key.json
+service-account*.json
+*-key.json
+
+kubeconfig
+*.pem
+*.key
+
+.env
+
+*.log
+
+.idea/
+.vscode/
+
+node_modules/
